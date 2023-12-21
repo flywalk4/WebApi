@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Chat</title>
+	<style>
+		.flex{
+			width: 50%;
+			margin: 0 auto;
+		}
+
+		.send{
+			text-align: right;
+		}
+
+		#messages{
+			margin: 0 auto;
+		}
+
+		.msg{
+			text-align: left;
+			border-radius: 4px;
+			padding: 10px;
+			border: 2px solid black;
+			background-color: gold;
+			margin-top: 10px;
+		}
+
+		.my-msg{
+			text-align: right;
+			background-color: rgb(255, 236, 131);
+		}
+
+		ul{
+			list-style: none;
+		}
+	</style>
+</head>
+
+<body>
+	<div class="flex flex-col items-center">
+		<h1>WebSocket Chat / Notifications of CRUD operations</h1>
+		<h2>Your ID: <span id="ws-id"></span></h2>
+		<form class="send" action="" onsubmit="sendMessage(event)">
+			<input class="bg-green-300" type="text" id="messageText" autocomplete="off" />
+			<button>Send</button>
+		</form>
+		<ul id='messages'> </ul>
+	</div>
+	<script>
+
+	function appendMessage(msg) {
+		let messages = document.getElementById('messages')
+		let message = document.createElement('li')
+		let span = document.createElement('span')
+		let content = document.createTextNode(msg)
+		if (content.textContent.indexOf(client_id) !== -1 || content.textContent.indexOf("You wrote") !== -1)
+			message.classList.add("my-msg")
+		message.classList.add("msg")
+		span.appendChild(content)
+		message.appendChild(span)
+		messages.prepend(message)
+	}
+	let client_id = Math.floor(Math.random() * 10000000) + 1
+	document.querySelector("#ws-id").textContent = client_id;
+	let ws = new WebSocket(`{{ ws_protocol }}://{{ server_urn }}/ws/${client_id}`);
+
+	ws.onmessage = function(event) {
+		appendMessage(event.data);
+	};
+
+	function sendMessage(event) {
+		let input = document.getElementById("messageText")
+		ws.send(input.value)
+		input.value = ''
+		event.preventDefault()
+	}
+	</script>
+</body>
+
+</html>
